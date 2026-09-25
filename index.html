@@ -1303,13 +1303,6 @@ it still doesn't feel like enough.`,
         DOM.musicLabel.textContent = "Music: On";
       }).catch(err => {
         console.warn("Audio autoplay / file load note:", err.message);
-        // Fallback: If assets/music.mp3 isn't available or fails to load,
-        // use Web Audio API romantic music box synthesizer so experience is never silent!
-        startFallbackRomanticSynth();
-        State.isMusicPlaying = true;
-        DOM.musicControlBtn.classList.add('playing');
-        DOM.musicControlBtn.classList.add('visible');
-        DOM.musicLabel.textContent = "Music: On";
       });
     }
 
