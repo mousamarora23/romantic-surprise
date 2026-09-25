@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#08020f">
+  <title>A Little Secret For You ❤️</title>
+
+  <!-- Inline Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
+
+  <!-- Google Fonts: Cormorant Garamond (Romantic Serif), Dancing Script (Handwritten), Plus Jakarta Sans (Modern Clean) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Dancing+Script:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & GLOBAL STYLING
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-dark: #07020d;
+      --bg-purple: #130722;
+      --accent-pink: #ff4b72;
+      --accent-rose: #ff758c;
+      --accent-purple: #9b51e0;
+      --accent-glow: rgba(255, 75, 114, 0.45);
+      --accent-violet-glow: rgba(155, 81, 224, 0.35);
+      --glass-bg: rgba(20, 10, 35, 0.68);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-hover: rgba(255, 75, 114, 0.5);
+      --text-white: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.72);
+      --text-dim: rgba(255, 255, 255, 0.45);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-script: 'Dancing Script', cursive;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: var(--font-sans);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Ambient background gradient glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 50% 30%, rgba(155, 81, 224, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 20% 80%, rgba(255, 75, 114, 0.15) 0%, transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(224, 86, 253, 0.12) 0%, transparent 55%),
+        linear-gradient(180deg, #090213 0%, #05010a 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Interactive Background Canvas (Stars & Floating Particles) */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       CONTAINER & SECTION CONTROLLER
+       ========================================================================== */
+    #app-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      perspective: 1200px;
+      overflow: hidden;
+    }
+
+    /* Standardized Section Layout */
+    .story-section {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.96) translateY(12px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.8s;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .story-section.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+      z-index: 20;
+    }
+
+    .story-section.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.04) translateY(-12px);
+      filter: blur(8px);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ==========================================================================
+       STEP 2: FLOATING MUSIC CONTROLLER (CORNER BUTTON)
+       ========================================================================== */
+    #music-control-btn {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      right: 16px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(22, 10, 38, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      cursor: pointer;
+      color: var(--text-white);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 75, 114, 0.2);
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+    }
+
+    #music-control-btn.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    #music-control-btn:hover {
+      background: rgba(35, 15, 60, 0.88);
+      border-color: var(--accent-pink);
+      box-shadow: 0 4px 25px rgba(255, 75, 114, 0.45);
+      transform: scale(1.04);
+    }
+
+    /* Animated Audio Wave Bars */
+    .audio-waves {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 14px;
+      width: 14px;
+    }
+
+    .audio-bar {
+      width: 2.5px;
+      background: var(--accent-pink);
+      border-radius: 2px;
+      transition: height 0.2s ease;
+      height: 4px;
+    }
+
+    .playing .audio-bar:nth-child(1) { animation: wave 1.2s infinite ease-in-out; }
+    .playing .audio-bar:nth-child(2) { animation: wave 0.8s infinite ease-in-out 0.2s; }
+    .playing .audio-bar:nth-child(3) { animation: wave 1.0s infinite ease-in-out 0.4s; }
+
+    @keyframes wave {
+      0%, 100% { height: 3px; }
+      50% { height: 14px; }
+    }
+
+    /* ==========================================================================
+       STEP 1: PASSWORD SCREEN
+       ========================================================================== */
+    .password-card {
+      width: 100%;
+      max-width: 380px;
+      padding: 38px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5), 
+                  0 0 35px rgba(155, 81, 224, 0.2),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      position: relative;
+    }
+
+    /* Pulsing Glowing Heart Icon */
+    .password-heart-wrap {
+      position: relative;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-heart-glow {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, rgba(255, 75, 114, 0.45) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: heartPulseGlow 2.2s infinite ease-in-out;
+    }
+
+    .password-heart-icon {
+      font-size: 48px;
+      display: inline-block;
+      filter: drop-shadow(0 0 16px var(--accent-pink));
+      animation: heartPulse 2.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes heartPulse {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.18); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.1); }
+    }
+
+    @keyframes heartPulseGlow {
+      0%, 100% { transform: scale(0.9); opacity: 0.5; }
+      20% { transform: scale(1.4); opacity: 0.9; }
+      40% { transform: scale(1); opacity: 0.6; }
+    }
+
+    .password-title {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 6vw, 32px);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 30%, #ffc0cb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .password-subtitle {
+      font-size: clamp(13px, 3.5vw, 14.5px);
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    /* Input & Eye Toggle Container */
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .password-input {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      background: rgba(10, 4, 18, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      letter-spacing: 1px;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    .password-input:focus {
+      border-color: var(--accent-pink);
+      box-shadow: 0 0 20px rgba(255, 75, 114, 0.35), inset 0 2px 6px rgba(0, 0, 0, 0.4);
+      background: rgba(14, 5, 25, 0.85);
+    }
+
+    .password-input::placeholder {
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      font-size: 13.5px;
+    }
+
+    /* Eye toggle icon */
+    .eye-toggle-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      transition: color 0.2s ease;
+    }
+
+    .eye-toggle-btn:hover {
+      color: var(--accent-pink);
+    }
+
+    .eye-toggle-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Unlock Button */
+    .btn-unlock {
+      width: 100%;
+      margin-top: 10px;
+      padding: 15px 24px;
+      background: linear-gradient(135deg, #ff4b72 0%, #a238e8 100%);
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(255, 75, 114, 0.4), 0 0 15px rgba(162, 56, 232, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .btn-unlock::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(60deg, transparent 40%, rgba(255, 255, 255, 0.25) 50%, transparent 60%);
+      transform: rotate(25deg);
+      transition: transform 0.6s ease;
+    }
+
+    .btn-unlock:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 75, 114, 0.6), 0 0 25px rgba(162, 56, 232, 0.5);
+    }
+
+    .btn-unlock:hover::after {
+      transform: rotate(25deg) translate(80%, -80%);
+    }
+
+    .btn-unlock:active {
+      transform: scale(0.98);
+    }
+
+    /* Error Message with Shake Animation */
+    .password-error {
+      min-height: 22px;
+      font-size: 13.5px;
+      color: #ff527b;
+      margin-top: 14px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: all 0.3s ease;
+      font-weight: 400;
+    }
+
+    .password-error.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .shake {
+      animation: shakeInput 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes shakeInput {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(4px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+
+    /* Unlock success animation */
+    .unlocking {
+      animation: unlockBurst 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes unlockBurst {
+      0% { transform: scale(1); filter: brightness(1); }
+      40% { transform: scale(1.08); filter: brightness(1.6) drop-shadow(0 0 35px var(--accent-pink)); }
+      100% { transform: scale(0.85); opacity: 0; filter: brightness(2) blur(10px); }
+    }
+
+    /* ==========================================================================
+       STEP 3: OPENING MESSAGE / TYPING EFFECT
+       ========================================================================== */
+    .typewriter-card {
+      width: 100%;
+      max-width: 520px;
+      padding: 38px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6), 0 0 30px rgba(155, 81, 224, 0.18);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .typewriter-content {
+      font-family: var(--font-serif);
+      font-size: clamp(20px, 4.8vw, 26px);
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.94);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      min-height: 220px;
+      text-align: left;
+      font-weight: 400;
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2.5px;
+      height: 1.2em;
+      background: var(--accent-pink);
+      vertical-align: text-bottom;
+      margin-left: 2px;
+      box-shadow: 0 0 8px var(--accent-pink);
+      animation: blink 0.9s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .typewriter-hint {
+      margin-top: 15px;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      text-align: right;
+    }
+
+    /* ==========================================================================
+       STEP 4: ROMANTIC MESSAGE SCREEN
+       ========================================================================== */
+    .romantic-card {
+      width: 100%;
+      max-width: 480px;
+      padding: 42px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(255, 75, 114, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .romantic-title {
+      font-family: var(--font-script);
+      font-size: clamp(32px, 8vw, 44px);
+      color: #ff9bbb;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(255, 155, 187, 0.45);
+      line-height: 1.3;
+    }
+
+    .romantic-body {
+      font-family: var(--font-serif);
+      font-size: clamp(19px, 4.5vw, 24px);
+      color: rgba(255, 255, 255, 0.9);
+      line-height: 1.8;
+      margin-bottom: 32px;
+      white-space: pre-line;
+      font-weight: 400;
+    }
+
+    .btn-glow-romantic {
+      padding: 14px 28px;
+      background: rgba(30, 12, 48, 0.7);
+      border: 1.5px solid var(--accent-pink);
+      border-radius: 30px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(255, 75, 114, 0.35);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-glow-romantic:hover, .btn-glow-romantic:active {
+      background: var(--accent-pink);
+      box-shadow: 0 0 35px rgba(255, 75, 114, 0.7);
+      transform: scale(1.05);
+    }
+
+    /* ==========================================================================
+       STEP 5, 6 & 7: 3D CIRCULAR / ORBIT MEDIA CAROUSEL & I MISS YOU MESSAGES
+       ========================================================================== */
+    .orbit-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Floating Emotional Message Banner (Step 7) */
+    .orbit-message-banner {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + clamp(58px, 8.5vh, 76px));
+      z-index: 50;
+      max-width: min(88%, 380px);
+      padding: 10px 22px;
+      background: rgba(20, 8, 36, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 20px rgba(255, 75, 114, 0.25);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-15px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      pointer-events: none;
+    }
+
+    .orbit-message-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .orbit-message-text {
+      font-family: var(--font-serif);
+      font-size: clamp(17px, 4.2vw, 23px);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #ff9ebb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Central 3D Orbit Viewport */
+    .orbit-viewport {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      max-height: 65vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+      perspective-origin: 50% 50%;
+    }
+
+    /* Central Glowing Heart at the Orbit Core */
+    .orbit-center-heart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: clamp(44px, 11vw, 62px);
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(0 0 25px rgba(255, 75, 114, 0.85));
+      animation: orbitHeartPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes orbitHeartPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 20px rgba(255, 75, 114, 0.7)); }
+      50% { transform: translate(-50%, -50%) scale(1.22); filter: drop-shadow(0 0 35px rgba(255, 75, 114, 1)); }
+    }
+
+    /* Orbit 3D Cylinder / Ring */
+    .orbit-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Media Cards inside 3D Orbit */
+    .orbit-card {
+      position: absolute;
+      width: 110px;
+      height: 165px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(22, 10, 38, 0.82);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      transform-style: preserve-3d;
+      transition: opacity 0.8s ease, transform 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease, filter 0.8s ease;
+      opacity: 0.45;
+      filter: brightness(0.65) blur(0.5px);
+      cursor: pointer;
+    }
+
+    @media (min-width: 480px) {
+      .orbit-card {
+        width: 135px;
+        height: 195px;
+        border-radius: 18px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .orbit-card {
+        width: 175px;
+        height: 250px;
+        border-radius: 22px;
+      }
+    }
+
+    /* Active Front Media Card */
+    .orbit-card.active {
+      opacity: 1;
+      filter: brightness(1) blur(0);
+      border: 2px solid var(--accent-pink);
+      box-shadow: 0 0 35px rgba(255, 75, 114, 0.7), 0 15px 40px rgba(0, 0, 0, 0.8);
+      z-index: 30;
+    }
+
+    .orbit-card-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #11051f;
+    }
+
+    /* Glass overlay badge on card */
+    .card-badge {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      padding: 3px 8px;
+      background: rgba(10, 4, 18, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 12px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Sequence Progress Indicator at the bottom of Orbit */
+    .orbit-progress-bar {
+      position: absolute;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(68px, 9.5vh, 84px));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 50;
+    }
+
+    .orbit-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .orbit-dot.active {
+      width: 22px;
+      border-radius: 10px;
+      background: var(--accent-pink);
+      box-shadow: 0 0 12px var(--accent-pink);
+    }
+
+    /* Step 3: Visible "Next ❤️" Button in Orbit Section */
+    .btn-orbit-next {
+      position: absolute;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(16px, 3vh, 26px));
+      z-index: 50;
+      padding: 10px 26px;
+      background: rgba(30, 12, 48, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid var(--accent-pink);
+      border-radius: 25px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 18px rgba(255, 75, 114, 0.35);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-orbit-next:hover, .btn-orbit-next:active {
+      background: var(--accent-pink);
+      box-shadow: 0 4px 25px rgba(255, 75, 114, 0.7);
+      transform: scale(1.05);
+    }
+
+    /* ==========================================================================
+       STEP 8, 9 & 10: FINAL SCENE & ANIMATED HEART
+       ========================================================================== */
+    .final-stage {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Dramatic Animated Heart (Step 9) */
+    .final-heart-wrapper {
+      position: relative;
+      width: 140px;
+      height: 130px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .final-heart-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 0 25px rgba(255, 75, 114, 0.85));
+    }
+
+    .final-heart-path {
+      fill: url(#heart-gradient);
+      stroke: #ff758c;
+      stroke-width: 4;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawHeart 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+                 pulseHeart 2.2s infinite ease-in-out 2.5s;
+    }
+
+    @keyframes drawHeart {
+      0% {
+        stroke-dashoffset: 1000;
+        fill-opacity: 0;
+      }
+      70% {
+        stroke-dashoffset: 0;
+        fill-opacity: 0.2;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        fill-opacity: 1;
+      }
+    }
+
+    @keyframes pulseHeart {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255, 75, 114, 0.8)); }
+      20% { transform: scale(1.15); filter: drop-shadow(0 0 35px rgba(255, 75, 114, 1)); }
+      35% { transform: scale(1.02); }
+      50% { transform: scale(1.12); filter: drop-shadow(0 0 30px rgba(255, 75, 114, 0.9)); }
+    }
+
+    /* Floating "I LOVE YOU" Text Spawner Container */
+    #floating-love-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 15;
+    }
+
+    .floating-love-badge {
+      position: absolute;
+      padding: 6px 14px;
+      background: rgba(25, 10, 45, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 117, 140, 0.4);
+      border-radius: 20px;
+      color: #ffb8c6;
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 75, 114, 0.35);
+      animation: floatLoveUpward linear forwards;
+    }
+
+    @keyframes floatLoveUpward {
+      0% {
+        transform: translateY(0) scale(0.7) rotate(var(--rot, 0deg));
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.9;
+        transform: translateY(-40px) scale(1) rotate(var(--rot, 0deg));
+      }
+      80% {
+        opacity: 0.85;
+      }
+      100% {
+        transform: translateY(-380px) scale(1.1) rotate(calc(var(--rot, 0deg) * 1.5));
+        opacity: 0;
+      }
+    }
+
+    /* Final Messages Typography (Step 10) */
+    .final-title {
+      font-family: var(--font-serif);
+      font-size: clamp(34px, 8.5vw, 48px);
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 10%, #ff8da6 60%, #ff4b72 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 25px rgba(255, 75, 114, 0.5));
+      animation: fadeInUp 1.4s ease forwards;
+    }
+
+    .final-subtitle {
+      font-family: var(--font-serif);
+      font-size: clamp(18px, 4.4vw, 23px);
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 24px;
+      white-space: pre-line;
+      font-weight: 400;
+      animation: fadeInUp 1.6s ease forwards 0.3s;
+      opacity: 0;
+    }
+
+    .final-closing {
+      font-family: var(--font-script);
+      font-size: clamp(26px, 6.5vw, 34px);
+      color: #ff9bbb;
+      text-shadow: 0 0 15px rgba(255, 155, 187, 0.5);
+      margin-bottom: 30px;
+      animation: fadeInUp 1.8s ease forwards 0.6s;
+      opacity: 0;
+    }
+
+    .btn-replay {
+      padding: 12px 24px;
+      background: rgba(25, 10, 42, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+      animation: fadeInUp 2s ease forwards 0.9s;
+      opacity: 0;
+    }
+
+    .btn-replay:hover {
+      border-color: var(--accent-pink);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(255, 75, 114, 0.4);
+      transform: scale(1.04);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Particle & Stars Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Step 2: Floating Music Control Button (Visible after password unlock) -->
+  <button id="music-control-btn" title="Toggle Music">
+    <div class="audio-waves" id="audio-waves">
+      <div class="audio-bar"></div>
+      <div class="audio-bar"></div>
+      <div class="audio-bar"></div>
+    </div>
+    <span id="music-label">Music: On</span>
+  </button>
+
+  <!-- Main Application Sections Wrapper -->
+  <main id="app-container">
+
+    <!-- =====================================================================
+         STEP 1: PASSWORD SCREEN
+         ===================================================================== -->
+    <section id="section-password" class="story-section active">
+      <div class="password-card" id="password-card">
+        <div class="password-heart-wrap">
+          <div class="password-heart-glow"></div>
+          <span class="password-heart-icon">❤️</span>
+        </div>
+        <h1 class="password-title" id="pwd-heading">A Little Secret ❤️</h1>
+        <p class="password-subtitle" id="pwd-subheading">Enter the password to unlock something special...</p>
+
+        <div class="input-wrapper">
+          <input 
+            type="password" 
+            id="password-input" 
+            class="password-input" 
+            placeholder="Enter password..." 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <button type="button" id="eye-toggle-btn" class="eye-toggle-btn" title="Toggle password visibility">
+            <svg id="eye-icon" viewBox="0 0 24 24">
+              <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+          </button>
+        </div>
+
+        <button id="btn-unlock" class="btn-unlock">Unlock ❤️</button>
+        <p id="password-error" class="password-error">Hmm... that's not it ❤️</p>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         STEP 3: OPENING MESSAGE / TYPING EFFECT
+         ===================================================================== -->
+    <section id="section-typewriter" class="story-section">
+      <div class="typewriter-card" id="typewriter-card" title="Click anywhere to skip typing">
+        <div class="typewriter-content" id="typewriter-text"></div>
+        <div class="typewriter-hint">Tap to reveal fully ✨</div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         STEP 4: ROMANTIC MESSAGE SCREEN
+         ===================================================================== -->
+    <section id="section-romantic" class="story-section">
+      <div class="romantic-card">
+        <h2 class="romantic-title" id="romantic-title">Maybe you're my favourite person. ❤️</h2>
+        <p class="romantic-body" id="romantic-body">I don't know where this little story goes...
+But I know one thing...
+I'm really glad I met you.</p>
+        <button id="btn-romantic-next" class="btn-glow-romantic">
+          <span id="romantic-btn-text">Keep this secret 🤫</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         STEP 5, 6 & 7: 3D CIRCULAR / ORBIT MEDIA CAROUSEL & I MISS YOU MESSAGES
+         ===================================================================== -->
+    <section id="section-orbit" class="story-section">
+      <div class="orbit-stage">
+        
+        <!-- Step 7: Periodic Emotional Message Banner -->
+        <div class="orbit-message-banner" id="orbit-banner">
+          <p class="orbit-message-text" id="orbit-banner-text">I MISS YOU ❤️</p>
+        </div>
+
+        <!-- 3D Viewport with Orbiting Media Cards and Central Heart -->
+        <div class="orbit-viewport">
+          <div class="orbit-center-heart">❤️</div>
+          <div class="orbit-ring" id="orbit-ring">
+            <!-- 8 Media Cards dynamically injected by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Sequence Progress Dots -->
+        <div class="orbit-progress-bar" id="orbit-dots">
+          <!-- 8 progress dots injected by JS -->
+        </div>
+
+        <!-- Step 3 Request: Visible Next Button to immediately advance to Finale -->
+        <button id="btn-orbit-next" class="btn-orbit-next" title="Skip to final surprise">
+          <span>Next ❤️</span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         STEP 8, 9 & 10: FINAL "I LOVE YOU" SCENE & ANIMATED HEART
+         ===================================================================== -->
+    <section id="section-final" class="story-section">
+      <div class="final-stage">
+        
+        <!-- Step 9: Dramatic Center Animated SVG Heart -->
+        <div class="final-heart-wrapper">
+          <svg class="final-heart-svg" viewBox="0 0 100 90">
+            <defs>
+              <linearGradient id="heart-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff758c"/>
+                <stop offset="50%" stop-color="#ff4b72"/>
+                <stop offset="100%" stop-color="#a238e8"/>
+              </linearGradient>
+            </defs>
+            <path class="final-heart-path" d="M 50,25 
+                     A 18,18 0 0,0 14,25 
+                     C 14,48 50,75 50,75 
+                     C 50,75 86,48 86,25 
+                     A 18,18 0 0,0 50,25 Z"/>
+          </svg>
+        </div>
+
+        <!-- Step 10: Final Messages -->
+        <h1 class="final-title" id="final-title">I LOVE YOU ❤️</h1>
+        <p class="final-subtitle" id="final-subtitle">No matter how many times I say it,
+it still doesn't feel like enough.</p>
+        <p class="final-closing" id="final-closing">❤️ Forever yours.</p>
+
+        <button id="btn-replay" class="btn-replay">
+          <span>Replay Experience ↺</span>
+        </button>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Step 9: Floating "I LOVE YOU" Badges Container -->
+  <div id="floating-love-container"></div>
+
+  <!-- Audio Element for Step 2 Background Music -->
+  <audio id="bg-audio" preload="auto" loop></audio>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       CONFIGURATION VARIABLES (CUSTOMIZE EVERYTHING HERE)
+       ========================================================================== */
+    const CONFIG = {
+      // 1. Password to unlock the surprise (Requirement 1: Changed to "BABY")
+      password: "BABY",
+
+      // 2. Background music file path & volume (0.0 to 1.0)
+      music: "assets/music.mp3",
+      musicVolume: 0.45,
+
+      // 3. 4 User Photos mapped accurately from assets folder
+      photos: [
+        "assets/photo1.jpeg",
+        "assets/photo2.jpeg",
+        "assets/photo3.jpeg",
+        "assets/photo4.jpeg"
+      ],
+
+      // 4. 4 User Videos mapped accurately from assets folder
+      videos: [
+        "assets/video1.mp4",
+        "assets/video2.mp4",
+        "assets/video3.mp4",
+        "assets/video4.mp4"
+      ],
+
+      // Media durations (in milliseconds)
+      photoDuration: 4000,   // Display each photo for 4 seconds
+      videoDuration: 7500,   // Play each video for ~7.5s (or until ended)
+      orbitLoops: 1,         // Number of complete loops through all 8 media items before finale
+
+      // Step 1: Password screen texts
+      introTitle: "A Little Secret ❤️",
+      introSub: "Enter the password to unlock something special...",
+      errorWrongPwd: "Hmm... that's not it ❤️",
+
+      // Step 3: Typewriter opening text
+      typewriterText: 
+`I don't really know when it happened.
+
+Maybe it was one conversation.
+Maybe it was one smile.
+Maybe it was simply the way you became
+someone I started looking forward to.
+
+Some people enter your life quietly...
+and somehow become a favourite part of it.`,
+
+      // Step 4: Romantic message
+      romanticTitle: "Maybe you're my favourite person. ❤️",
+      romanticBody: 
+`I don't know where this little story goes...
+But I know one thing...
+I'm really glad I met you.`,
+      romanticButton: "Keep this secret 🤫",
+
+      // Step 7: Periodic emotional messages during media orbit
+      orbitMessages: [
+        "I MISS YOU ❤️",
+        "Wish you were here...",
+        "Some people just become special without even trying.",
+        "You mean more to me than you probably realize."
+      ],
+
+      // Step 10: Final closing messages
+      finalTitle: "I LOVE YOU ❤️",
+      finalSubtitle: 
+`No matter how many times I say it,
+it still doesn't feel like enough.`,
+      finalClosing: "❤️ Forever yours."
+    };
+
+    /* ==========================================================================
+       MEDIA SEQUENCE DEFINITION (PHOTO 1 -> VIDEO 1 -> PHOTO 2 -> VIDEO 2...)
+       ========================================================================== */
+    const MEDIA_SEQUENCE = [
+      { type: 'photo', src: CONFIG.photos[0], title: 'Photo 1' },
+      { type: 'video', src: CONFIG.videos[0], title: 'Video 1' },
+      { type: 'photo', src: CONFIG.photos[1], title: 'Photo 2' },
+      { type: 'video', src: CONFIG.videos[1], title: 'Video 2' },
+      { type: 'photo', src: CONFIG.photos[2], title: 'Photo 3' },
+      { type: 'video', src: CONFIG.videos[2], title: 'Video 3' },
+      { type: 'photo', src: CONFIG.photos[3], title: 'Photo 4' },
+      { type: 'video', src: CONFIG.videos[3], title: 'Video 4' }
+    ];
+
+    /* ==========================================================================
+       GLOBAL STATE & CONTROLLERS
+       ========================================================================== */
+    const State = {
+      currentSection: 'section-password',
+      isMusicPlaying: false,
+      musicMuted: false,
+      mediaIndex: 0,
+      orbitTimer: null,
+      messageTimer: null,
+      typewriterTimer: null,
+      typewriterDone: false,
+      completedLoops: 0,
+      isOrbiting: false,
+      synthInterval: null,
+      audioCtx: null
+    };
+
+    /* DOM Elements */
+    const DOM = {
+      appContainer: document.getElementById('app-container'),
+      bgCanvas: document.getElementById('bg-canvas'),
+      bgAudio: document.getElementById('bg-audio'),
+      musicControlBtn: document.getElementById('music-control-btn'),
+      musicLabel: document.getElementById('music-label'),
+      audioWaves: document.getElementById('audio-waves'),
+
+      // Password Section
+      sectionPassword: document.getElementById('section-password'),
+      passwordCard: document.getElementById('password-card'),
+      pwdHeading: document.getElementById('pwd-heading'),
+      pwdSubheading: document.getElementById('pwd-subheading'),
+      passwordInput: document.getElementById('password-input'),
+      eyeToggleBtn: document.getElementById('eye-toggle-btn'),
+      eyeIcon: document.getElementById('eye-icon'),
+      btnUnlock: document.getElementById('btn-unlock'),
+      passwordError: document.getElementById('password-error'),
+
+      // Typewriter Section
+      sectionTypewriter: document.getElementById('section-typewriter'),
+      typewriterCard: document.getElementById('typewriter-card'),
+      typewriterText: document.getElementById('typewriter-text'),
+
+      // Romantic Message Section
+      sectionRomantic: document.getElementById('section-romantic'),
+      romanticTitle: document.getElementById('romantic-title'),
+      romanticBody: document.getElementById('romantic-body'),
+      romanticBtnText: document.getElementById('romantic-btn-text'),
+      btnRomanticNext: document.getElementById('btn-romantic-next'),
+
+      // Orbit Media Section
+      sectionOrbit: document.getElementById('section-orbit'),
+      orbitBanner: document.getElementById('orbit-banner'),
+      orbitBannerText: document.getElementById('orbit-banner-text'),
+      orbitRing: document.getElementById('orbit-ring'),
+      orbitDots: document.getElementById('orbit-dots'),
+      btnOrbitNext: document.getElementById('btn-orbit-next'),
+
+      // Final Section
+      sectionFinal: document.getElementById('section-final'),
+      finalTitle: document.getElementById('final-title'),
+      finalSubtitle: document.getElementById('final-subtitle'),
+      finalClosing: document.getElementById('final-closing'),
+      btnReplay: document.getElementById('btn-replay'),
+      floatingLoveContainer: document.getElementById('floating-love-container')
+    };
+
+    /* Initialize texts from CONFIG */
+    DOM.pwdHeading.textContent = CONFIG.introTitle;
+    DOM.pwdSubheading.textContent = CONFIG.introSub;
+    DOM.passwordError.textContent = CONFIG.errorWrongPwd;
+    DOM.romanticTitle.textContent = CONFIG.romanticTitle;
+    DOM.romanticBody.textContent = CONFIG.romanticBody;
+    DOM.romanticBtnText.textContent = CONFIG.romanticButton;
+    DOM.finalTitle.textContent = CONFIG.finalTitle;
+    DOM.finalSubtitle.textContent = CONFIG.finalSubtitle;
+    DOM.finalClosing.textContent = CONFIG.finalClosing;
+
+    /* ==========================================================================
+       SECTION TRANSITIONS
+       ========================================================================== */
+    function switchSection(targetSectionId) {
+      const current = document.getElementById(State.currentSection);
+      const target = document.getElementById(targetSectionId);
+
+      if (current && current.id !== targetSectionId) {
+        current.classList.add('fade-out');
+        current.classList.remove('active');
+        setTimeout(() => {
+          current.classList.remove('fade-out');
+        }, 800);
+      }
+
+      if (target) {
+        target.classList.remove('fade-out');
+        target.classList.add('active');
+        State.currentSection = targetSectionId;
+      }
+    }
+
+    /* ==========================================================================
+       STEP 2 & 11: AUDIO & MUSIC SYSTEM WITH FALLBACK GENERATOR
+       ========================================================================== */
+    function initMusic() {
+      DOM.bgAudio.src = CONFIG.music;
+      DOM.bgAudio.volume = CONFIG.musicVolume;
+      DOM.bgAudio.loop = true;
+
+      DOM.bgAudio.play().then(() => {
+        State.isMusicPlaying = true;
+        DOM.musicControlBtn.classList.add('playing');
+        DOM.musicControlBtn.classList.add('visible');
+        DOM.musicLabel.textContent = "Music: On";
+      }).catch(err => {
+        console.warn("Audio autoplay / file load note:", err.message);
+        // Fallback: If assets/music.mp3 isn't available or fails to load,
+        // use Web Audio API romantic music box synthesizer so experience is never silent!
+        startFallbackRomanticSynth();
+        State.isMusicPlaying = true;
+        DOM.musicControlBtn.classList.add('playing');
+        DOM.musicControlBtn.classList.add('visible');
+        DOM.musicLabel.textContent = "Music: On";
+      });
+    }
+
+    // Ensure song never stops: automatically loop and replay whenever it ends
+    DOM.bgAudio.addEventListener('ended', () => {
+      DOM.bgAudio.currentTime = 0;
+      DOM.bgAudio.play().catch(() => {});
+    });
+
+    /* Romantic Web Audio Synthesizer (Dreamy ambient music box fallback) */
+    function startFallbackRomanticSynth() {
+      if (State.audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        State.audioCtx = new AudioContext();
+        
+        // Pentatonic chords (C major / A minor dreamy melody)
+        const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+        let noteIndex = 0;
+
+        function playChime(freq, timeOffset = 0) {
+          if (!State.audioCtx || State.musicMuted) return;
+          const osc = State.audioCtx.createOscillator();
+          const gain = State.audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, State.audioCtx.currentTime + timeOffset);
+
+          gain.gain.setValueAtTime(0, State.audioCtx.currentTime + timeOffset);
+          gain.gain.linearRampToValueAtTime(0.08, State.audioCtx.currentTime + timeOffset + 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.0001, State.audioCtx.currentTime + timeOffset + 2.8);
+
+          osc.connect(gain);
+          gain.connect(State.audioCtx.destination);
+
+          osc.start(State.audioCtx.currentTime + timeOffset);
+          osc.stop(State.audioCtx.currentTime + timeOffset + 3.0);
+        }
+
+        State.synthInterval = setInterval(() => {
+          if (!State.isMusicPlaying || State.musicMuted) return;
+          const f1 = notes[noteIndex % notes.length];
+          const f2 = notes[(noteIndex + 2) % notes.length];
+          playChime(f1, 0);
+          playChime(f2, 0.4);
+          noteIndex = (noteIndex + 1) % notes.length;
+        }, 1800);
+
+      } catch (e) {
+        console.warn("Web Audio API unavailable:", e);
+      }
+    }
+
+    /* Music Control Button Toggle */
+    DOM.musicControlBtn.addEventListener('click', () => {
+      if (DOM.bgAudio && DOM.bgAudio.src && !DOM.bgAudio.error && DOM.bgAudio.readyState >= 2) {
+        if (DOM.bgAudio.paused) {
+          DOM.bgAudio.play();
+          State.musicMuted = false;
+          DOM.musicControlBtn.classList.add('playing');
+          DOM.musicLabel.textContent = "Music: On";
+        } else {
+          DOM.bgAudio.pause();
+          State.musicMuted = true;
+          DOM.musicControlBtn.classList.remove('playing');
+          DOM.musicLabel.textContent = "Music: Muted";
+        }
+      } else {
+        // Fallback synth mute toggle
+        State.musicMuted = !State.musicMuted;
+        if (State.musicMuted) {
+          DOM.musicControlBtn.classList.remove('playing');
+          DOM.musicLabel.textContent = "Music: Muted";
+        } else {
+          DOM.musicControlBtn.classList.add('playing');
+          DOM.musicLabel.textContent = "Music: On";
+        }
+      }
+    });
+
+    /* Step 11: Smooth Music Fade Out */
+    function fadeOutMusic(durationMs = 4000) {
+      if (DOM.bgAudio && !DOM.bgAudio.paused) {
+        const startVolume = DOM.bgAudio.volume;
+        const steps = 30;
+        const stepTime = durationMs / steps;
+        let stepCount = 0;
+
+        const fadeTimer = setInterval(() => {
+          stepCount++;
+          const newVol = startVolume * (1 - stepCount / steps);
+          if (newVol <= 0.02) {
+            DOM.bgAudio.volume = 0;
+            DOM.bgAudio.pause();
+            clearInterval(fadeTimer);
+            DOM.musicControlBtn.classList.remove('playing');
+            DOM.musicLabel.textContent = "Music: Ended";
+          } else {
+            DOM.bgAudio.volume = newVol;
+          }
+        }, stepTime);
+      }
+
+      if (State.synthInterval) {
+        setTimeout(() => {
+          clearInterval(State.synthInterval);
+          State.synthInterval = null;
+          if (State.audioCtx) {
+            State.audioCtx.close().catch(() => {});
+          }
+          DOM.musicControlBtn.classList.remove('playing');
+          DOM.musicLabel.textContent = "Music: Ended";
+        }, durationMs);
+      }
+    }
+
+    /* ==========================================================================
+       STEP 1: PASSWORD VERIFICATION & UNLOCK
+       ========================================================================== */
+    function checkPassword() {
+      const entered = DOM.passwordInput.value.trim();
+      const correct = String(CONFIG.password).trim();
+
+      if (entered.toLowerCase() === correct.toLowerCase()) {
+        // Correct Password: Play Unlock Animation
+        DOM.passwordError.classList.remove('show');
+        DOM.passwordCard.classList.add('unlocking');
+
+        // Start background music immediately from user gesture
+        initMusic();
+
+        // Burst particle sparkles on canvas
+        createSparkleBurst(window.innerWidth / 2, window.innerHeight / 2);
+
+        // Transition to Step 3 (Opening typewriter) after 600ms
+        setTimeout(() => {
+          switchSection('section-typewriter');
+          startTypewriter();
+        }, 600);
+
+      } else {
+        // Incorrect Password: Shake & show feedback
+        DOM.passwordCard.classList.remove('shake');
+        void DOM.passwordCard.offsetWidth; // Trigger reflow
+        DOM.passwordCard.classList.add('shake');
+        DOM.passwordError.classList.add('show');
+        DOM.passwordInput.focus();
+
+        setTimeout(() => {
+          DOM.passwordCard.classList.remove('shake');
+        }, 600);
+      }
+    }
+
+    DOM.btnUnlock.addEventListener('click', checkPassword);
+    DOM.passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+
+    /* Password visibility toggle */
+    DOM.eyeToggleBtn.addEventListener('click', () => {
+      const isPassword = DOM.passwordInput.type === 'password';
+      DOM.passwordInput.type = isPassword ? 'text' : 'password';
+
+      DOM.eyeIcon.innerHTML = isPassword 
+        ? `<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>`
+        : `<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>`;
+    });
+
+    /* ==========================================================================
+       STEP 3: TYPEWRITER OPENING ANIMATION
+       ========================================================================== */
+    function startTypewriter() {
+      DOM.typewriterText.innerHTML = '';
+      State.typewriterDone = false;
+      const text = CONFIG.typewriterText;
+      let charIndex = 0;
+
+      // Create cursor element
+      const cursor = document.createElement('span');
+      cursor.className = 'typewriter-cursor';
+
+      function finishTypewriterNow() {
+        if (State.typewriterDone) return;
+        State.typewriterDone = true;
+        if (State.typewriterTimer) clearTimeout(State.typewriterTimer);
+        DOM.typewriterText.innerHTML = text;
+        cursor.remove();
+        setTimeout(() => {
+          switchSection('section-romantic');
+          startRomanticSection();
+        }, 600);
+      }
+
+      DOM.typewriterCard.onclick = finishTypewriterNow;
+      DOM.sectionTypewriter.onclick = finishTypewriterNow;
+
+      function typeNextChar() {
+        if (State.typewriterDone) return;
+
+        if (charIndex < text.length) {
+          const char = text.charAt(charIndex);
+          DOM.typewriterText.appendChild(document.createTextNode(char));
+          DOM.typewriterText.appendChild(cursor);
+          charIndex++;
+
+          // Natural readable human cadence (comfortable reading speed)
+          let delay = 75;
+          if (char === '.' || char === '!' || char === '?') delay = 600;
+          else if (char === ',') delay = 320;
+          else if (char === '\n') delay = 450;
+
+          State.typewriterTimer = setTimeout(typeNextChar, delay);
+        } else {
+          State.typewriterDone = true;
+          // Finished typing! Wait 4.5 seconds so user can read everything comfortably
+          setTimeout(() => {
+            cursor.remove();
+            switchSection('section-romantic');
+            startRomanticSection();
+          }, 4500);
+        }
+      }
+
+      State.typewriterTimer = setTimeout(typeNextChar, 500);
+    }
+
+    /* ==========================================================================
+       STEP 4: ROMANTIC MESSAGE SCREEN
+       ========================================================================== */
+    let romanticTimer = null;
+    function startRomanticSection() {
+      // Auto-continue after 6.5s if user does not click
+      romanticTimer = setTimeout(() => {
+        advanceToOrbit();
+      }, 6500);
+    }
+
+    function advanceToOrbit() {
+      if (romanticTimer) clearTimeout(romanticTimer);
+      switchSection('section-orbit');
+      startOrbitExperience();
+    }
+
+    DOM.btnRomanticNext.addEventListener('click', advanceToOrbit);
+
+    /* ==========================================================================
+       STEP 5 & 6: 3D CIRCULAR / ORBIT MEDIA CAROUSEL & I MISS YOU MESSAGES
+       ========================================================================== */
+    function getOrbitRadius() {
+      const screenW = window.innerWidth;
+      if (screenW < 380) return 138;
+      if (screenW < 480) return 150;
+      if (screenW < 768) return 185;
+      return 290;
+    }
+
+    function updateOrbitRadius() {
+      const radius = getOrbitRadius();
+      const count = MEDIA_SEQUENCE.length;
+      MEDIA_SEQUENCE.forEach((_, index) => {
+        const card = document.getElementById(`orbit-card-${index}`);
+        if (card) {
+          const angle = (360 / count) * index;
+          card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+        }
+      });
+    }
+
+    function buildOrbitCarousel() {
+      DOM.orbitRing.innerHTML = '';
+      DOM.orbitDots.innerHTML = '';
+
+      const count = MEDIA_SEQUENCE.length; // 8 items
+      const radius = getOrbitRadius();
+
+      MEDIA_SEQUENCE.forEach((item, index) => {
+        const angle = (360 / count) * index;
+
+        // Card Container
+        const card = document.createElement('div');
+        card.className = `orbit-card ${index === State.mediaIndex ? 'active' : ''}`;
+        card.id = `orbit-card-${index}`;
+
+        // Set initial 3D transform position in cylinder
+        card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+        card.dataset.angle = angle;
+        card.dataset.index = index;
+
+        // Click card to jump to it directly
+        card.addEventListener('click', () => {
+          if (State.orbitTimer) clearTimeout(State.orbitTimer);
+          State.mediaIndex = index;
+          playCurrentMediaItem();
+        });
+
+        // Media Element (Image or Video)
+        if (item.type === 'photo') {
+          const img = document.createElement('img');
+          img.className = 'orbit-card-media';
+          img.src = item.src;
+          img.alt = item.title;
+          img.loading = 'eager';
+
+          // Graceful fallback if user photo is missing
+          img.onerror = () => {
+            img.onerror = null;
+            img.src = createSvgRomanticCard(item.title);
+          };
+
+          card.appendChild(img);
+
+          const badge = document.createElement('div');
+          badge.className = 'card-badge';
+          badge.innerHTML = `<span>📷</span> <span>Memory</span>`;
+          card.appendChild(badge);
+
+        } else {
+          // Video Element
+          const video = document.createElement('video');
+          video.className = 'orbit-card-media';
+          video.src = item.src;
+          video.muted = true;
+          video.playsInline = true;
+          video.setAttribute('playsinline', '');
+          video.setAttribute('webkit-playsinline', '');
+          video.setAttribute('muted', '');
+          video.loop = true;
+          video.preload = 'auto';
+
+          // Graceful fallback if video file is missing
+          video.onerror = () => {
+            card.innerHTML = '';
+            const posterImg = document.createElement('img');
+            posterImg.className = 'orbit-card-media';
+            posterImg.src = createSvgRomanticCard(`Video Moment ${Math.ceil((index+1)/2)}`);
+            card.appendChild(posterImg);
+          };
+
+          card.appendChild(video);
+
+          const badge = document.createElement('div');
+          badge.className = 'card-badge';
+          badge.innerHTML = `<span>🎬</span> <span>Video</span>`;
+          card.appendChild(badge);
+        }
+
+        DOM.orbitRing.appendChild(card);
+
+        // Progress Dot
+        const dot = document.createElement('div');
+        dot.className = `orbit-dot ${index === State.mediaIndex ? 'active' : ''}`;
+        dot.id = `orbit-dot-${index}`;
+        dot.addEventListener('click', () => {
+          if (State.orbitTimer) clearTimeout(State.orbitTimer);
+          State.mediaIndex = index;
+          playCurrentMediaItem();
+        });
+        DOM.orbitDots.appendChild(dot);
+      });
+    }
+
+    /* Fallback Romantic Vector SVG generator for missing media files */
+    function createSvgRomanticCard(title) {
+      const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="300" height="420" viewBox="0 0 300 420">
+        <defs>
+          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2d0b4d"/>
+            <stop offset="50%" stop-color="#160527"/>
+            <stop offset="100%" stop-color="#0a0212"/>
+          </linearGradient>
+          <radialGradient id="glow" cx="50%" cy="40%" r="50%">
+            <stop offset="0%" stop-color="#ff4b72" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#ff4b72" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#bg)"/>
+        <circle cx="150" cy="180" r="90" fill="url(#glow)"/>
+        <path d="M 150,150 A 24,24 0 0,0 102,150 C 102,182 150,215 150,215 C 150,215 198,182 198,150 A 24,24 0 0,0 150,150 Z" fill="#ff758c"/>
+        <text x="150" y="270" font-family="'Cormorant Garamond', serif" font-size="21" fill="#ffffff" text-anchor="middle" font-weight="600">${title}</text>
+        <text x="150" y="295" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle">Every moment with you is special</text>
+      </svg>`;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    /* Orbit Step Controller */
+    function startOrbitExperience() {
+      // Ensure clean styles on ring
+      DOM.orbitRing.style.transition = 'transform 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
+      DOM.orbitRing.style.opacity = '1';
+      DOM.orbitRing.style.filter = 'none';
+
+      buildOrbitCarousel();
+      State.isOrbiting = true;
+      State.mediaIndex = 0;
+      State.completedLoops = 0;
+
+      // Start Step 7 Periodic Emotional Messages
+      startPeriodicOrbitMessages();
+
+      // Play First Media Item
+      playCurrentMediaItem();
+    }
+
+    function rotateOrbitToIndex(index) {
+      const count = MEDIA_SEQUENCE.length;
+      const anglePerCard = 360 / count;
+      const targetAngle = -index * anglePerCard;
+
+      // Rotate the 3D ring so the active card faces front
+      DOM.orbitRing.style.transform = `rotateY(${targetAngle}deg)`;
+
+      // Update card classes
+      MEDIA_SEQUENCE.forEach((_, i) => {
+        const card = document.getElementById(`orbit-card-${i}`);
+        const dot = document.getElementById(`orbit-dot-${i}`);
+
+        if (card) {
+          if (i === index) {
+            card.classList.add('active');
+          } else {
+            card.classList.remove('active');
+            // If it had a playing video, pause and reset
+            const v = card.querySelector('video');
+            if (v) {
+              v.pause();
+              v.currentTime = 0;
+              v.muted = true;
+            }
+          }
+        }
+
+        if (dot) {
+          if (i === index) dot.classList.add('active');
+          else dot.classList.remove('active');
+        }
+      });
+    }
+
+    function playCurrentMediaItem() {
+      if (!State.isOrbiting) return;
+
+      const currentItem = MEDIA_SEQUENCE[State.mediaIndex];
+      rotateOrbitToIndex(State.mediaIndex);
+
+      const activeCard = document.getElementById(`orbit-card-${State.mediaIndex}`);
+      let duration = CONFIG.photoDuration;
+
+      if (currentItem.type === 'video') {
+        duration = CONFIG.videoDuration;
+
+        // When a video starts: pause the background music
+        if (DOM.bgAudio && !DOM.bgAudio.paused) {
+          DOM.bgAudio.pause();
+          DOM.musicControlBtn.classList.remove('playing');
+          DOM.musicLabel.textContent = "Music: Paused (Video)";
+        }
+
+        const video = activeCard ? activeCard.querySelector('video') : null;
+        if (video) {
+          video.currentTime = 0;
+          video.muted = false; // allow video audio
+          video.volume = 1.0;
+          video.play().catch(() => {
+            // fallback if browser requires muted autoplay
+            video.muted = true;
+            video.play().catch(() => {});
+          });
+        }
+      } else {
+        // When a photo starts: resume background music if not manually muted by user
+        if (DOM.bgAudio && DOM.bgAudio.paused && !State.musicMuted) {
+          DOM.bgAudio.play().then(() => {
+            DOM.musicControlBtn.classList.add('playing');
+            DOM.musicLabel.textContent = "Music: On";
+          }).catch(() => {});
+        }
+      }
+
+      // Schedule next item
+      State.orbitTimer = setTimeout(() => {
+        advanceOrbitNext();
+      }, duration);
+    }
+
+    function advanceOrbitNext() {
+      if (!State.isOrbiting) return;
+
+      State.mediaIndex++;
+      if (State.mediaIndex >= MEDIA_SEQUENCE.length) {
+        State.mediaIndex = 0;
+        State.completedLoops++;
+
+        // If configured loops reached, transition to Final Scene (Step 8)
+        if (State.completedLoops >= CONFIG.orbitLoops) {
+          finishOrbitAndTransitionToFinal();
+          return;
+        }
+      }
+
+      playCurrentMediaItem();
+    }
+
+    /* Requirement 3: Next Button inside 3D Orbit - Immediately skips to Grand Finale */
+    DOM.btnOrbitNext.addEventListener('click', () => {
+      finishOrbitAndTransitionToFinal();
+    });
+
+    /* ==========================================================================
+       STEP 7: "I MISS YOU" PERIODIC EMOTIONAL MESSAGES
+       ========================================================================== */
+    function startPeriodicOrbitMessages() {
+      let msgIndex = 0;
+
+      function showNextMsg() {
+        if (!State.isOrbiting) return;
+
+        const msg = CONFIG.orbitMessages[msgIndex % CONFIG.orbitMessages.length];
+        DOM.orbitBannerText.textContent = msg;
+        DOM.orbitBanner.classList.add('show');
+
+        // Hide after 3.2 seconds
+        setTimeout(() => {
+          DOM.orbitBanner.classList.remove('show');
+        }, 3200);
+
+        msgIndex++;
+        // Display new message every 4.8 seconds
+        State.messageTimer = setTimeout(showNextMsg, 4800);
+      }
+
+      // Show first message shortly after orbit begins
+      State.messageTimer = setTimeout(showNextMsg, 1000);
+    }
+
+    /* ==========================================================================
+       STEP 8: FINAL TRANSITION TO FINALE
+       ========================================================================== */
+    function finishOrbitAndTransitionToFinal() {
+      State.isOrbiting = false;
+      if (State.orbitTimer) clearTimeout(State.orbitTimer);
+      if (State.messageTimer) clearTimeout(State.messageTimer);
+
+      DOM.orbitBanner.classList.remove('show');
+
+      // Stop video playback and mute
+      const videos = DOM.orbitRing.querySelectorAll('video');
+      videos.forEach(v => {
+        v.pause();
+        v.currentTime = 0;
+        v.muted = true;
+      });
+
+      // Resume background music for the Grand Finale if paused during video
+      if (DOM.bgAudio && DOM.bgAudio.paused && !State.musicMuted) {
+        DOM.bgAudio.play().then(() => {
+          DOM.musicControlBtn.classList.add('playing');
+          DOM.musicLabel.textContent = "Music: On";
+        }).catch(() => {});
+      }
+
+      // Slowly blur & fade out the orbit ring
+      DOM.orbitRing.style.transition = 'all 1.6s cubic-bezier(0.16, 1, 0.3, 1)';
+      DOM.orbitRing.style.transform += ' scale(0.7)';
+      DOM.orbitRing.style.opacity = '0';
+      DOM.orbitRing.style.filter = 'blur(16px)';
+
+      // Darken background and increase heart sparkles
+      createSparkleBurst(window.innerWidth / 2, window.innerHeight / 2, 80);
+
+      setTimeout(() => {
+        switchSection('section-final');
+        startFinalScene();
+      }, 1000);
+    }
+
+    /* ==========================================================================
+       STEP 9, 10 & 11: FINAL SCENE, FLOATING "I LOVE YOU", & MUSIC FADE-OUT
+       ========================================================================== */
+    let floatingLoveInterval = null;
+
+    function startFinalScene() {
+      // Step 9: Start generating floating "I LOVE YOU" badges
+      startFloatingLoveBadges();
+
+      // Step 11: Music End - Gradually reduce music volume over 4.5 seconds and stop
+      setTimeout(() => {
+        fadeOutMusic(4500);
+      }, 5000);
+    }
+
+    function startFloatingLoveBadges() {
+      if (floatingLoveInterval) clearInterval(floatingLoveInterval);
+
+      const phrases = [
+        "I LOVE YOU ❤️",
+        "I Love You",
+        "Forever Yours",
+        "My Favourite Person",
+        "Always & Forever",
+        "I MISS YOU ❤️",
+        "Only You",
+        "My Whole Heart ❤️"
+      ];
+
+      function spawnBadge() {
+        const badge = document.createElement('div');
+        badge.className = 'floating-love-badge';
+
+        const text = phrases[Math.floor(Math.random() * phrases.length)];
+        badge.textContent = text;
+
+        // Random horizontal spawn position around center
+        const screenW = window.innerWidth;
+        const leftPos = Math.random() * (screenW - 140) + 20;
+        const startY = window.innerHeight * 0.72 + (Math.random() * 60 - 30);
+        const rot = (Math.random() * 24 - 12);
+        const duration = 4.5 + Math.random() * 3.5;
+
+        badge.style.left = `${leftPos}px`;
+        badge.style.top = `${startY}px`;
+        badge.style.setProperty('--rot', `${rot}deg`);
+        badge.style.animationDuration = `${duration}s`;
+        badge.style.fontSize = `${12 + Math.random() * 6}px`;
+
+        DOM.floatingLoveContainer.appendChild(badge);
+
+        // Remove element after animation completes
+        setTimeout(() => {
+          badge.remove();
+        }, duration * 1000);
+      }
+
+      // Spawn initial burst
+      for (let i = 0; i < 6; i++) {
+        setTimeout(spawnBadge, i * 350);
+      }
+
+      // Continuous gentle spawning
+      floatingLoveInterval = setInterval(spawnBadge, 900);
+    }
+
+    /* Replay Experience Button */
+    DOM.btnReplay.addEventListener('click', () => {
+      if (floatingLoveInterval) clearInterval(floatingLoveInterval);
+      DOM.floatingLoveContainer.innerHTML = '';
+
+      // Reset audio volume and replay
+      if (DOM.bgAudio && DOM.bgAudio.src) {
+        DOM.bgAudio.currentTime = 0;
+        DOM.bgAudio.volume = CONFIG.musicVolume;
+        DOM.bgAudio.play().catch(() => {});
+        DOM.musicControlBtn.classList.add('playing');
+        DOM.musicLabel.textContent = "Music: On";
+      }
+
+      // Transition back to typewriter opening
+      switchSection('section-typewriter');
+      startTypewriter();
+    });
+
+    /* ==========================================================================
+       CANVAS BACKGROUND: TWINKLING STARS, FLOATING PARTICLES & BURSTS
+       ========================================================================== */
+    const Canvas = {
+      canvas: DOM.bgCanvas,
+      ctx: DOM.bgCanvas.getContext('2d'),
+      particles: [],
+      stars: [],
+      burstParticles: [],
+      width: 0,
+      height: 0
+    };
+
+    function resizeCanvas() {
+      Canvas.width = window.innerWidth;
+      Canvas.height = window.innerHeight;
+      Canvas.canvas.width = Canvas.width * window.devicePixelRatio;
+      Canvas.canvas.height = Canvas.height * window.devicePixelRatio;
+      Canvas.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      initStars();
+    }
+
+    function initStars() {
+      Canvas.stars = [];
+      const count = Math.floor((Canvas.width * Canvas.height) / 8000);
+      for (let i = 0; i < count; i++) {
+        Canvas.stars.push({
+          x: Math.random() * Canvas.width,
+          y: Math.random() * Canvas.height,
+          radius: Math.random() * 1.4 + 0.3,
+          alpha: Math.random(),
+          twinkleSpeed: (Math.random() * 0.02 + 0.005) * (Math.random() > 0.5 ? 1 : -1)
+        });
+      }
+    }
+
+    /* Floating Heart/Dust Particles */
+    function spawnParticle() {
+      if (Canvas.particles.length > 35) return;
+      Canvas.particles.push({
+        x: Math.random() * Canvas.width,
+        y: Canvas.height + 20,
+        size: Math.random() * 8 + 4,
+        speedY: Math.random() * 0.8 + 0.3,
+        speedX: (Math.random() - 0.5) * 0.4,
+        alpha: Math.random() * 0.45 + 0.15,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.02,
+        isHeart: Math.random() > 0.4
+      });
+    }
+
+    function createSparkleBurst(cx, cy, count = 40) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 5 + 1.5;
+        Canvas.burstParticles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 2.5 + 1,
+          alpha: 1,
+          decay: Math.random() * 0.02 + 0.015,
+          color: Math.random() > 0.5 ? '#ff4b72' : '#ffc0cb'
+        });
+      }
+    }
+
+    function drawCanvas() {
+      Canvas.ctx.clearRect(0, 0, Canvas.width, Canvas.height);
+
+      // Draw Twinkling Stars
+      for (let star of Canvas.stars) {
+        star.alpha += star.twinkleSpeed;
+        if (star.alpha > 0.95 || star.alpha < 0.15) {
+          star.twinkleSpeed = -star.twinkleSpeed;
+        }
+
+        Canvas.ctx.beginPath();
+        Canvas.ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        Canvas.ctx.fillStyle = `rgba(255, 230, 245, ${star.alpha})`;
+        Canvas.ctx.shadowBlur = star.radius > 1 ? 5 : 0;
+        Canvas.ctx.shadowColor = '#ff758c';
+        Canvas.ctx.fill();
+      }
+
+      // Draw Floating Heart / Dust Particles
+      for (let i = Canvas.particles.length - 1; i >= 0; i--) {
+        const p = Canvas.particles[i];
+        p.y -= p.speedY;
+        p.x += p.speedX;
+        p.rotation += p.rotSpeed;
+
+        if (p.isHeart) {
+          // Draw subtle floating mini heart
+          Canvas.ctx.save();
+          Canvas.ctx.translate(p.x, p.y);
+          Canvas.ctx.rotate(p.rotation);
+          Canvas.ctx.fillStyle = `rgba(255, 75, 114, ${p.alpha})`;
+          Canvas.ctx.shadowBlur = 8;
+          Canvas.ctx.shadowColor = 'rgba(255, 75, 114, 0.5)';
+          Canvas.ctx.beginPath();
+          const topCurveHeight = p.size * 0.3;
+          Canvas.ctx.moveTo(0, topCurveHeight);
+          Canvas.ctx.bezierCurveTo(0, 0, -p.size / 2, 0, -p.size / 2, topCurveHeight);
+          Canvas.ctx.bezierCurveTo(-p.size / 2, (p.size + topCurveHeight) / 2, 0, (p.size + topCurveHeight) / 2, 0, p.size);
+          Canvas.ctx.bezierCurveTo(0, (p.size + topCurveHeight) / 2, p.size / 2, (p.size + topCurveHeight) / 2, p.size / 2, topCurveHeight);
+          Canvas.ctx.bezierCurveTo(p.size / 2, 0, 0, 0, 0, topCurveHeight);
+          Canvas.ctx.closePath();
+          Canvas.ctx.fill();
+          Canvas.ctx.restore();
+        } else {
+          // Soft ambient dust particle
+          Canvas.ctx.beginPath();
+          Canvas.ctx.arc(p.x, p.y, p.size * 0.4, 0, Math.PI * 2);
+          Canvas.ctx.fillStyle = `rgba(224, 86, 253, ${p.alpha * 0.7})`;
+          Canvas.ctx.shadowBlur = 6;
+          Canvas.ctx.shadowColor = '#e056fd';
+          Canvas.ctx.fill();
+        }
+
+        // Remove offscreen particles
+        if (p.y < -30) {
+          Canvas.particles.splice(i, 1);
+        }
+      }
+
+      // Draw Sparkle Burst Particles
+      for (let i = Canvas.burstParticles.length - 1; i >= 0; i--) {
+        const bp = Canvas.burstParticles[i];
+        bp.x += bp.vx;
+        bp.y += bp.vy;
+        bp.alpha -= bp.decay;
+
+        if (bp.alpha <= 0) {
+          Canvas.burstParticles.splice(i, 1);
+          continue;
+        }
+
+        Canvas.ctx.beginPath();
+        Canvas.ctx.arc(bp.x, bp.y, bp.radius, 0, Math.PI * 2);
+        Canvas.ctx.fillStyle = bp.color;
+        Canvas.ctx.shadowBlur = 10;
+        Canvas.ctx.shadowColor = bp.color;
+        Canvas.ctx.globalAlpha = bp.alpha;
+        Canvas.ctx.fill();
+        Canvas.ctx.globalAlpha = 1.0;
+      }
+
+      // Spawn new particles periodically
+      if (Math.random() < 0.08) spawnParticle();
+
+      requestAnimationFrame(drawCanvas);
+    }
+
+    // Responsive Canvas & Orbit Resizing
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      if (State.isOrbiting) {
+        updateOrbitRadius();
+        rotateOrbitToIndex(State.mediaIndex);
+      }
+    });
+
+    // Start Canvas
+    resizeCanvas();
+    drawCanvas();
+
+  </script>
+</body>
+</html>
