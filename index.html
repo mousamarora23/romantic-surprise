@@ -1201,9 +1201,7 @@ it still doesn't feel like enough.`,
       typewriterTimer: null,
       typewriterDone: false,
       completedLoops: 0,
-      isOrbiting: false,
-      synthInterval: null,
-      audioCtx: null
+      isOrbiting: false
     };
 
     /* DOM Elements */
@@ -1312,74 +1310,20 @@ it still doesn't feel like enough.`,
       DOM.bgAudio.play().catch(() => {});
     });
 
-    /* Romantic Web Audio Synthesizer (Dreamy ambient music box fallback) */
-    function startFallbackRomanticSynth() {
-      if (State.audioCtx) return;
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        State.audioCtx = new AudioContext();
-        
-        // Pentatonic chords (C major / A minor dreamy melody)
-        const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
-        let noteIndex = 0;
-
-        function playChime(freq, timeOffset = 0) {
-          if (!State.audioCtx || State.musicMuted) return;
-          const osc = State.audioCtx.createOscillator();
-          const gain = State.audioCtx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, State.audioCtx.currentTime + timeOffset);
-
-          gain.gain.setValueAtTime(0, State.audioCtx.currentTime + timeOffset);
-          gain.gain.linearRampToValueAtTime(0.08, State.audioCtx.currentTime + timeOffset + 0.1);
-          gain.gain.exponentialRampToValueAtTime(0.0001, State.audioCtx.currentTime + timeOffset + 2.8);
-
-          osc.connect(gain);
-          gain.connect(State.audioCtx.destination);
-
-          osc.start(State.audioCtx.currentTime + timeOffset);
-          osc.stop(State.audioCtx.currentTime + timeOffset + 3.0);
-        }
-
-        State.synthInterval = setInterval(() => {
-          if (!State.isMusicPlaying || State.musicMuted) return;
-          const f1 = notes[noteIndex % notes.length];
-          const f2 = notes[(noteIndex + 2) % notes.length];
-          playChime(f1, 0);
-          playChime(f2, 0.4);
-          noteIndex = (noteIndex + 1) % notes.length;
-        }, 1800);
-
-      } catch (e) {
-        console.warn("Web Audio API unavailable:", e);
-      }
-    }
-
     /* Music Control Button Toggle */
     DOM.musicControlBtn.addEventListener('click', () => {
-      if (DOM.bgAudio && DOM.bgAudio.src && !DOM.bgAudio.error && DOM.bgAudio.readyState >= 2) {
-        if (DOM.bgAudio.paused) {
-          DOM.bgAudio.play();
+      if (!DOM.bgAudio) return;
+      if (DOM.bgAudio.paused) {
+        DOM.bgAudio.play().then(() => {
           State.musicMuted = false;
           DOM.musicControlBtn.classList.add('playing');
           DOM.musicLabel.textContent = "Music: On";
-        } else {
-          DOM.bgAudio.pause();
-          State.musicMuted = true;
-          DOM.musicControlBtn.classList.remove('playing');
-          DOM.musicLabel.textContent = "Music: Muted";
-        }
+        }).catch(() => {});
       } else {
-        // Fallback synth mute toggle
-        State.musicMuted = !State.musicMuted;
-        if (State.musicMuted) {
-          DOM.musicControlBtn.classList.remove('playing');
-          DOM.musicLabel.textContent = "Music: Muted";
-        } else {
-          DOM.musicControlBtn.classList.add('playing');
-          DOM.musicLabel.textContent = "Music: On";
-        }
+        DOM.bgAudio.pause();
+        State.musicMuted = true;
+        DOM.musicControlBtn.classList.remove('playing');
+        DOM.musicLabel.textContent = "Music: Muted";
       }
     });
 
@@ -1404,18 +1348,6 @@ it still doesn't feel like enough.`,
             DOM.bgAudio.volume = newVol;
           }
         }, stepTime);
-      }
-
-      if (State.synthInterval) {
-        setTimeout(() => {
-          clearInterval(State.synthInterval);
-          State.synthInterval = null;
-          if (State.audioCtx) {
-            State.audioCtx.close().catch(() => {});
-          }
-          DOM.musicControlBtn.classList.remove('playing');
-          DOM.musicLabel.textContent = "Music: Ended";
-        }, durationMs);
       }
     }
 
@@ -1607,12 +1539,6 @@ it still doesn't feel like enough.`,
           img.alt = item.title;
           img.loading = 'eager';
 
-          // Graceful fallback if user photo is missing
-          img.onerror = () => {
-            img.onerror = null;
-            img.src = createSvgRomanticCard(item.title);
-          };
-
           card.appendChild(img);
 
           const badge = document.createElement('div');
@@ -1632,15 +1558,6 @@ it still doesn't feel like enough.`,
           video.setAttribute('muted', '');
           video.loop = true;
           video.preload = 'auto';
-
-          // Graceful fallback if video file is missing
-          video.onerror = () => {
-            card.innerHTML = '';
-            const posterImg = document.createElement('img');
-            posterImg.className = 'orbit-card-media';
-            posterImg.src = createSvgRomanticCard(`Video Moment ${Math.ceil((index+1)/2)}`);
-            card.appendChild(posterImg);
-          };
 
           card.appendChild(video);
 
@@ -1663,30 +1580,6 @@ it still doesn't feel like enough.`,
         });
         DOM.orbitDots.appendChild(dot);
       });
-    }
-
-    /* Fallback Romantic Vector SVG generator for missing media files */
-    function createSvgRomanticCard(title) {
-      const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="300" height="420" viewBox="0 0 300 420">
-        <defs>
-          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#2d0b4d"/>
-            <stop offset="50%" stop-color="#160527"/>
-            <stop offset="100%" stop-color="#0a0212"/>
-          </linearGradient>
-          <radialGradient id="glow" cx="50%" cy="40%" r="50%">
-            <stop offset="0%" stop-color="#ff4b72" stop-opacity="0.6"/>
-            <stop offset="100%" stop-color="#ff4b72" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#bg)"/>
-        <circle cx="150" cy="180" r="90" fill="url(#glow)"/>
-        <path d="M 150,150 A 24,24 0 0,0 102,150 C 102,182 150,215 150,215 C 150,215 198,182 198,150 A 24,24 0 0,0 150,150 Z" fill="#ff758c"/>
-        <text x="150" y="270" font-family="'Cormorant Garamond', serif" font-size="21" fill="#ffffff" text-anchor="middle" font-weight="600">${title}</text>
-        <text x="150" y="295" font-family="'Plus Jakarta Sans', sans-serif" font-size="12" fill="rgba(255,255,255,0.7)" text-anchor="middle">Every moment with you is special</text>
-      </svg>`;
-      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     }
 
     /* Orbit Step Controller */
