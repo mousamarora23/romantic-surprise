@@ -1110,6 +1110,7 @@ it still doesn't feel like enough.</p>
 
       // 2. Background music file path & volume (0.0 to 1.0)
       music: "assets/music.mp3",
+      cdnMusic: "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/music.mp3",
       musicVolume: 0.45,
 
       // 3. 4 User Photos mapped accurately from assets folder
@@ -1119,6 +1120,12 @@ it still doesn't feel like enough.</p>
         "assets/photo3.jpeg",
         "assets/photo4.jpeg"
       ],
+      cdnPhotos: [
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/photo1.jpeg",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/photo2.jpeg",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/photo3.jpeg",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/photo4.jpeg"
+      ],
 
       // 4. 4 User Videos mapped accurately from assets folder
       videos: [
@@ -1126,6 +1133,12 @@ it still doesn't feel like enough.</p>
         "assets/video2.mp4",
         "assets/video3.mp4",
         "assets/video4.mp4"
+      ],
+      cdnVideos: [
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/video1.mp4",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/video2.mp4",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/video3.mp4",
+        "https://raw.githubusercontent.com/mousamarora23/romantic-surprise/main/assets/video4.mp4"
       ],
 
       // Media durations (in milliseconds)
@@ -1178,14 +1191,14 @@ it still doesn't feel like enough.`,
        MEDIA SEQUENCE DEFINITION (PHOTO 1 -> VIDEO 1 -> PHOTO 2 -> VIDEO 2...)
        ========================================================================== */
     const MEDIA_SEQUENCE = [
-      { type: 'photo', src: CONFIG.photos[0], title: 'Photo 1' },
-      { type: 'video', src: CONFIG.videos[0], title: 'Video 1' },
-      { type: 'photo', src: CONFIG.photos[1], title: 'Photo 2' },
-      { type: 'video', src: CONFIG.videos[1], title: 'Video 2' },
-      { type: 'photo', src: CONFIG.photos[2], title: 'Photo 3' },
-      { type: 'video', src: CONFIG.videos[2], title: 'Video 3' },
-      { type: 'photo', src: CONFIG.photos[3], title: 'Photo 4' },
-      { type: 'video', src: CONFIG.videos[3], title: 'Video 4' }
+      { type: 'photo', src: CONFIG.photos[0], cdnSrc: CONFIG.cdnPhotos[0], title: 'Photo 1' },
+      { type: 'video', src: CONFIG.videos[0], cdnSrc: CONFIG.cdnVideos[0], title: 'Video 1' },
+      { type: 'photo', src: CONFIG.photos[1], cdnSrc: CONFIG.cdnPhotos[1], title: 'Photo 2' },
+      { type: 'video', src: CONFIG.videos[1], cdnSrc: CONFIG.cdnVideos[1], title: 'Video 2' },
+      { type: 'photo', src: CONFIG.photos[2], cdnSrc: CONFIG.cdnPhotos[2], title: 'Photo 3' },
+      { type: 'video', src: CONFIG.videos[2], cdnSrc: CONFIG.cdnVideos[2], title: 'Video 3' },
+      { type: 'photo', src: CONFIG.photos[3], cdnSrc: CONFIG.cdnPhotos[3], title: 'Photo 4' },
+      { type: 'video', src: CONFIG.videos[3], cdnSrc: CONFIG.cdnVideos[3], title: 'Video 4' }
     ];
 
     /* ==========================================================================
@@ -1294,6 +1307,18 @@ it still doesn't feel like enough.`,
       DOM.bgAudio.volume = CONFIG.musicVolume;
       DOM.bgAudio.loop = true;
 
+      DOM.bgAudio.onerror = () => {
+        if (DOM.bgAudio.src !== CONFIG.cdnMusic) {
+          DOM.bgAudio.src = CONFIG.cdnMusic;
+          DOM.bgAudio.play().then(() => {
+            State.isMusicPlaying = true;
+            DOM.musicControlBtn.classList.add('playing');
+            DOM.musicControlBtn.classList.add('visible');
+            DOM.musicLabel.textContent = "Music: On";
+          }).catch(() => {});
+        }
+      };
+
       DOM.bgAudio.play().then(() => {
         State.isMusicPlaying = true;
         DOM.musicControlBtn.classList.add('playing');
@@ -1301,6 +1326,15 @@ it still doesn't feel like enough.`,
         DOM.musicLabel.textContent = "Music: On";
       }).catch(err => {
         console.warn("Audio autoplay / file load note:", err.message);
+        if (DOM.bgAudio.src !== CONFIG.cdnMusic) {
+          DOM.bgAudio.src = CONFIG.cdnMusic;
+          DOM.bgAudio.play().then(() => {
+            State.isMusicPlaying = true;
+            DOM.musicControlBtn.classList.add('playing');
+            DOM.musicControlBtn.classList.add('visible');
+            DOM.musicLabel.textContent = "Music: On";
+          }).catch(() => {});
+        }
       });
     }
 
@@ -1539,6 +1573,13 @@ it still doesn't feel like enough.`,
           img.alt = item.title;
           img.loading = 'eager';
 
+          // Automatic CDN fallback if relative path fails on host
+          img.onerror = () => {
+            if (img.src !== item.cdnSrc) {
+              img.src = item.cdnSrc;
+            }
+          };
+
           card.appendChild(img);
 
           const badge = document.createElement('div');
@@ -1558,6 +1599,14 @@ it still doesn't feel like enough.`,
           video.setAttribute('muted', '');
           video.loop = true;
           video.preload = 'auto';
+
+          // Automatic CDN fallback if relative path fails on host
+          video.onerror = () => {
+            if (video.src !== item.cdnSrc) {
+              video.src = item.cdnSrc;
+              video.play().catch(() => {});
+            }
+          };
 
           card.appendChild(video);
 
